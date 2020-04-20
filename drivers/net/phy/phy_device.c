@@ -1787,6 +1787,8 @@ EXPORT_SYMBOL(genphy_write_mmd_unsupported);
 
 int genphy_suspend(struct phy_device *phydev)
 {
+	int value;
+
 	if (get_wol_state())
 	{
 		struct net_device * ndev = phydev->attached_dev;
@@ -1833,6 +1835,8 @@ EXPORT_SYMBOL(genphy_suspend);
 
 int genphy_resume(struct phy_device *phydev)
 {
+	int value;
+
 	if (get_wol_state() && phydev->suspended) {
 		mutex_lock(&phydev->lock);
 

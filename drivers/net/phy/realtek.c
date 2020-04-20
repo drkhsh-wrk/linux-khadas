@@ -307,6 +307,16 @@ static int rtl8211x_page_mask_bits(struct phy_device *phydev, u16 page,
 	return rtl8211x_page_write(phydev, page, address, val);
 }
 
+static int rtl821x_read_page(struct phy_device *phydev)
+{
+	return __phy_read(phydev, RTL821x_PAGE_SELECT);
+}
+
+static int rtl821x_write_page(struct phy_device *phydev, int page)
+{
+	return __phy_write(phydev, RTL821x_PAGE_SELECT, page);
+}
+
 
 static int rtl8201_ack_interrupt(struct phy_device *phydev)
 {
@@ -542,8 +552,8 @@ static struct phy_driver realtek_drvs[] = {
 		.config_intr	= &rtl8201_config_intr,
 		.suspend	= genphy_suspend,
 		.resume		= genphy_resume,
-		.read_page	= rtl8211x_page_read,
-		.write_page	= rtl8211x_page_write,
+		.read_page	= rtl821x_read_page,
+		.write_page	= rtl821x_write_page,
 	}, {
 		.phy_id		= 0x001cc910,
 		.name		= "RTL8211 Gigabit Ethernet",

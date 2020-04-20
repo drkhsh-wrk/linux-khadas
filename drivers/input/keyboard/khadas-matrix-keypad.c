@@ -371,7 +371,7 @@ static int matrix_keypad_probe(struct platform_device *pdev)
 {
 	struct matrix_keypad *keypad;
 	struct input_dev *input_dev;
-	int err, ret;
+	int err = 0, ret;
 
 //    type = get_board_type();
 //    if (type != KHADAS_CAPTAIN)

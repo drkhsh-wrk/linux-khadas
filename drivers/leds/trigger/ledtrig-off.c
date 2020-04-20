@@ -14,11 +14,11 @@
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/leds.h>
-#include "../leds.h"
 
-static void off_trig_activate(struct led_classdev *led_cdev)
+static int off_trig_activate(struct led_classdev *led_cdev)
 {
-	led_set_brightness_async(led_cdev, LED_OFF);
+	led_set_brightness_sync(led_cdev, LED_OFF);
+	return 0;
 }
 
 static struct led_trigger off_led_trigger = {
