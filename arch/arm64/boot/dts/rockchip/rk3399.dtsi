@@ -683,7 +683,7 @@
 		reg-shift = <2>;
 		reg-io-width = <4>;
 		pinctrl-names = "default";
-		pinctrl-0 = <&uart0_xfer>;
+		pinctrl-0 = <&uart0_xfer &uart0_cts &uart0_rts>;
 		status = "disabled";
 	};
 
@@ -722,7 +722,7 @@
 		reg-shift = <2>;
 		reg-io-width = <4>;
 		pinctrl-names = "default";
-		pinctrl-0 = <&uart3_xfer>;
+		pinctrl-0 = <&uart3_xfer &uart3_cts &uart3_rts>;
 		status = "disabled";
 	};
 

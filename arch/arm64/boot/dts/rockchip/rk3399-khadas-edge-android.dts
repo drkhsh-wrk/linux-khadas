@@ -151,7 +151,7 @@
 
 	vm149c_front: vm149c_front@0c {
 		compatible = "silicon touch,vm149c";
-		status = "okay";
+		status = "disabled";
 		reg = <0x0c>;
 		rockchip,camera-module-index = <1>;
 		rockchip,camera-module-facing = "front";		
@@ -159,7 +159,7 @@
 	
 	imx214f: imx214f@10 {
 		compatible = "sony,imx214";
-		status = "okay";
+		status = "disabled";
 		reg = <0x10>;
 		clocks = <&cru SCLK_CIF_OUT>;
 		clock-names = "xvclk";
@@ -1026,7 +1026,7 @@
 };
 
 &mipi_dphy_tx1rx1 {
-	status = "okay";
+	status = "disabled";
 
 	ports {
 		#address-cells = <1>;
@@ -1058,7 +1058,7 @@
 };
 
 &rkisp1_1 {
-	status = "okay";
+	status = "disabled";
 
 	port {
 		#address-cells = <1>;
