@@ -293,12 +293,6 @@
 
 &hdmi {
 	status = "okay";
-	rockchip,phy-table =
-		<74250000 0x8009 0x0004 0x0272>,
-		<165000000 0x802b 0x0004 0x0209>,
-		<297000000 0x8029 0x0005 0x028d>,
-		<594000000 0x8039 0x0000 0x0090>,
-		<000000000 0x0000 0x0000 0x0000>;
 };
 
 &route_hdmi {
@@ -957,7 +951,6 @@
 
 &usbdrd3_0 {
 	status = "okay";
-	extcon = <&fusb0>;
 };
 
 &usbdrd3_1 {
@@ -966,6 +959,7 @@
 
 &usbdrd_dwc3_0 {
 	status = "okay";
+	extcon = <&fusb0>;
 };
 
 &usbdrd_dwc3_1 {

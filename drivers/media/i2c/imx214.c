@@ -395,7 +395,7 @@ static const struct regval imx214_4208x3120_regs[] = {
 	{REG_NULL, 0x00},
 };
 
-static const struct imx214_mode supported_modes_2lane[] = {
+static const struct imx214_mode supported_modes[] = {
 	{
 		.width = 4208,
 		.height = 3120,
@@ -422,7 +422,7 @@ static const struct imx214_mode supported_modes_2lane[] = {
 	},
 };
 			
-static const struct imx214_mode *supported_modes;
+//static const struct imx214_mode *supported_modes;
 
 static const s64 link_freq_menu_items[] = {
 	IMX214_LINK_FREQ_FULL,
@@ -531,7 +531,7 @@ static const struct imx214_mode *
 	int cur_best_fit_dist = -1;
 	unsigned int i;
 
-	for (i = 0; i < imx214->cfg_num; i++) {
+	for (i = 0; i < ARRAY_SIZE(supported_modes); i++) {
 		dist = imx214_get_reso_dist(&supported_modes[i], framefmt);
 		if (cur_best_fit_dist == -1 || dist < cur_best_fit_dist) {
 			cur_best_fit_dist = dist;
@@ -631,8 +631,7 @@ static int imx214_enum_frame_sizes(struct v4l2_subdev *sd,
 	struct v4l2_subdev_pad_config *cfg,
 	struct v4l2_subdev_frame_size_enum *fse)
 {
-	struct imx214 *imx214 = to_imx214(sd);
-	if (fse->index >= imx214->cfg_num)
+	if (fse->index >= ARRAY_SIZE(supported_modes))
 		return -EINVAL;
 
 	if (fse->code != IMX214_MEDIA_BUS_FMT)
@@ -1197,6 +1196,23 @@ static int imx214_open(struct v4l2_subdev *sd, struct v4l2_subdev_fh *fh)
 }
 #endif
 
+static int imx214_enum_frame_interval(struct v4l2_subdev *sd,
+				       struct v4l2_subdev_pad_config *cfg,
+				       struct v4l2_subdev_frame_interval_enum *fie)
+{
+	if (fie->index >= ARRAY_SIZE(supported_modes))
+		return -EINVAL;
+
+	if (fie->code != MEDIA_BUS_FMT_SBGGR10_1X10)
+		return -EINVAL;
+
+	fie->width = supported_modes[fie->index].width;
+	fie->height = supported_modes[fie->index].height;
+	fie->interval = supported_modes[fie->index].max_fps;
+	return 0;
+}
+
+
 static const struct dev_pm_ops imx214_pm_ops = {
 	SET_RUNTIME_PM_OPS(imx214_runtime_suspend,
 		imx214_runtime_resume, NULL)
@@ -1224,6 +1240,7 @@ static const struct v4l2_subdev_video_ops imx214_video_ops = {
 static const struct v4l2_subdev_pad_ops imx214_pad_ops = {
 	.enum_mbus_code = imx214_enum_mbus_code,
 	.enum_frame_size = imx214_enum_frame_sizes,
+	.enum_frame_interval = imx214_enum_frame_interval,
 	.get_fmt = imx214_get_fmt,
 	.set_fmt = imx214_set_fmt,
 };
@@ -1412,7 +1429,7 @@ static int imx214_configure_regulators(struct imx214 *imx214)
 		IMX214_NUM_SUPPLIES,
 		imx214->supplies);
 }
-
+#if 0
 static int imx214_parse_of(struct imx214 *imx214)
 {
 	struct device *dev = &imx214->client->dev;
@@ -1447,6 +1464,7 @@ static int imx214_parse_of(struct imx214 *imx214)
 	}
 	return 0;
 }
+#endif
 
 /*static void free_gpio(struct imx214 *imx214)
 {
@@ -1544,11 +1562,11 @@ static int imx214_probe(struct i2c_client *client,
 		dev_err(dev, "Failed to get power regulators\n");
 		return ret;
 	}
-
+/*
 	ret = imx214_parse_of(imx214);
 	if (ret != 0)
 		return -EINVAL;
-
+*/
 	imx214->pinctrl = devm_pinctrl_get(dev);
 	if (!IS_ERR(imx214->pinctrl)) {
 		imx214->pins_default =
@@ -1615,7 +1633,8 @@ continue_probe:
 #endif
 #if defined(CONFIG_MEDIA_CONTROLLER)
 	imx214->pad.flags = MEDIA_PAD_FL_SOURCE;
-	sd->entity.obj_type = MEDIA_ENTITY_TYPE_V4L2_SUBDEV;
+	//sd->entity.obj_type = MEDIA_ENTITY_TYPE_V4L2_SUBDEV;
+	sd->entity.function = MEDIA_ENT_F_CAM_SENSOR;
 	ret = media_entity_pads_init(&sd->entity, 1, &imx214->pad);
 	if (ret < 0)
 		goto err_power_off;
