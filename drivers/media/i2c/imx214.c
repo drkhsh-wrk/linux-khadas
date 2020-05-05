@@ -1100,7 +1100,14 @@ static int __imx214_power_on(struct imx214 *imx214)
 		if (ret < 0)
 			dev_err(dev, "could not set pins\n");
 	}
-
+	
+	ret = clk_set_rate(imx214->xvclk, IMX214_XVCLK_FREQ);
+	if (ret < 0) {
+		dev_warn(dev, "Failed to set xvclk rate (24MHz)\n");
+	}
+	if (clk_get_rate(imx214->xvclk) != IMX214_XVCLK_FREQ)
+		dev_warn(dev, "xvclk mismatched, modes are based on 24MHz\n");
+		
 	ret = clk_prepare_enable(imx214->xvclk);
 	if (ret < 0) {
 		dev_err(dev, "Failed to enable xvclk\n");
@@ -1527,13 +1534,6 @@ static int imx214_probe(struct i2c_client *client,
 		dev_err(dev, "Failed to get xvclk\n");
 		return -EINVAL;
 	}
-	ret = clk_set_rate(imx214->xvclk, IMX214_XVCLK_FREQ);
-	if (ret < 0) {
-		dev_err(dev, "Failed to set xvclk rate (24MHz)\n");
-		return ret;
-	}
-	if (clk_get_rate(imx214->xvclk) != IMX214_XVCLK_FREQ)
-		dev_warn(dev, "xvclk mismatched, modes are based on 24MHz\n");
 
 	imx214->reset_gpio = devm_gpiod_get(dev, "reset", GPIOD_OUT_LOW);
 	if (IS_ERR(imx214->reset_gpio)) {
@@ -1629,7 +1629,7 @@ continue_probe:
 
 #ifdef CONFIG_VIDEO_V4L2_SUBDEV_API
 	sd->internal_ops = &imx214_internal_ops;
-	sd->flags |= V4L2_SUBDEV_FL_HAS_DEVNODE;
+	sd->flags |= V4L2_SUBDEV_FL_HAS_DEVNODE | V4L2_SUBDEV_FL_HAS_EVENTS;
 #endif
 #if defined(CONFIG_MEDIA_CONTROLLER)
 	imx214->pad.flags = MEDIA_PAD_FL_SOURCE;
