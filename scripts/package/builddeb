@@ -45,13 +45,17 @@ create_package() {
 					DTB=kvim2_linux.dtb
 					;;
 				VIM3)
-					DTB=kvim3_linux.dtb
+					if [ \$INSTALL_TYPE == EMMC-SFS ]; then
+						DTB=kvim3_linux_sfs.dtb
+					else
+						DTB=kvim3_linux.dtb
+					fi
 					;;
 				VIM3L)
 					DTB=kvim3l_linux.dtb
 					;;
 			esac
-			if [ \$INSTALL_TYPE != EMMC ]; then
+			if [ \$INSTALL_TYPE != EMMC ] && [ \$INSTALL_TYPE != EMMC-SFS ]; then
 				cp /boot/dtb/\$DTB /boot/dtb.img
 			fi
 			exit 0
