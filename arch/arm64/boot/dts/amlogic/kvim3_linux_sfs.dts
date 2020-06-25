@@ -67,7 +67,7 @@
 		rootfs:rootfs
 		{
 			pname = "rootfs";
-			size = <0x2 0x0>;
+			size = <0x0 0xA0000000>;
 			mask = <4>;
 		};
 		data:data
