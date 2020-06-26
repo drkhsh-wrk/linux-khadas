@@ -253,6 +253,7 @@ if grep -q '^CONFIG_BLK_DEV_INITRD=y' $KCONFIG_CONFIG; then
 else
 	want_initrd=No
 fi
+want_initrd=No
 for script in postinst postrm preinst prerm ; do
 	mkdir -p "$tmpdir$debhookdir/$script.d"
 	cat <<EOF > "$tmpdir/DEBIAN/$script"
