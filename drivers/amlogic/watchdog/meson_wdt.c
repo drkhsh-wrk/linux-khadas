@@ -49,13 +49,15 @@ struct aml_wdt_dev {
 	unsigned int one_second;
 	struct device *dev;
 	struct mutex lock;
-	unsigned int reset_watchdog_method;
 	struct delayed_work boot_queue;
 	void __iomem *reg_base;
 	struct notifier_block pm_notifier;
 	struct notifier_block reboot_notifier;
 	bool is_running; /* 1:enable 0:disable */
 };
+
+static bool handle_boot_enabled =
+	IS_ENABLED(CONFIG_WATCHDOG_HANDLE_BOOT_ENABLED);
 
 static void aml_update_bits(void __iomem  *reg, unsigned int mask,
 							unsigned int val)
@@ -202,13 +204,6 @@ void aml_init_pdata(struct aml_wdt_dev *wdev)
 		"dt probe default_timeout failed: %d\n", ret);
 		wdev->default_timeout = 5;
 	}
-	ret = of_property_read_u32(wdev->dev->of_node, "reset_watchdog_method",
-					&wdev->reset_watchdog_method);
-	if (ret) {
-		dev_err(wdev->dev,
-			"dt probe reset_watchdog_method failed: %d\n", ret);
-		wdev->reset_watchdog_method = 1;
-	}
 	ret = of_property_read_u32(wdev->dev->of_node, "reset_watchdog_time",
 						&wdev->reset_watchdog_time);
 	if (ret) {
@@ -290,7 +285,7 @@ static int aml_wtd_reboot_notify(struct notifier_block *nb,
 			"reboot_notify: disable watchdog (event = %lu)\n",
 			event);
 	}
-	if (wdev->reset_watchdog_method == 1)
+	if (handle_boot_enabled)
 		cancel_delayed_work(&wdev->boot_queue);
 	return NOTIFY_OK;
 }
@@ -349,8 +344,7 @@ static int aml_wdt_probe(struct platform_device *pdev)
 	watchdog_set_drvdata(aml_wdt, wdev);
 	platform_set_drvdata(pdev, aml_wdt);
 	wdev->is_running = false;
-	if (wdev->reset_watchdog_method == 1) {
-
+	if (handle_boot_enabled) {
 		INIT_DELAYED_WORK(&wdev->boot_queue, boot_moniter_work);
 		mod_delayed_work(system_freezable_wq, &wdev->boot_queue,
 	 round_jiffies(msecs_to_jiffies(wdev->reset_watchdog_time*1000)));
@@ -377,7 +371,7 @@ static void aml_wdt_shutdown(struct platform_device *pdev)
 	struct watchdog_device *wdog = platform_get_drvdata(pdev);
 	struct aml_wdt_dev *wdev = watchdog_get_drvdata(wdog);
 
-	if (wdev->reset_watchdog_method == 1)
+	if (handle_boot_enabled)
 		cancel_delayed_work(&wdev->boot_queue);
 	disable_watchdog(wdev);
 }
@@ -442,4 +436,7 @@ module_exit(aml_wdt_driver_exit);
 MODULE_LICENSE("GPL");
 MODULE_ALIAS("platform:aml_wdt");
 
-
+module_param(handle_boot_enabled, bool, 0444);
+MODULE_PARM_DESC(handle_boot_enabled,
+	"Watchdog core auto-updates boot enabled watchdogs before userspace takes over (default="
+	__MODULE_STRING(IS_ENABLED(CONFIG_WATCHDOG_HANDLE_BOOT_ENABLED)) ")");
